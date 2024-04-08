@@ -1,108 +1,88 @@
-import 'reflect-metadata';
 import { GameMakerBufferType } from './types/gm-buffers.types';
 
-export class GmBufferInterface {
-  static readData(msg: Buffer, offset: number, bufferType: GameMakerBufferType): any {
-    switch (bufferType) {
-    case 'buffer_u8':
-      return msg.readUInt8(offset);
-    case 'buffer_s8':
-      return msg.readInt8(offset);
-    case 'buffer_u16':
-      return msg.readUInt16BE(offset);
-    case 'buffer_s16':
-      return msg.readInt16BE(offset);
-    case 'buffer_u32':
-      return msg.readUInt32BE(offset);
-    case 'buffer_s32':
-      return msg.readInt32BE(offset);
-    case 'buffer_u64':
-      return msg.readBigUInt64BE(offset);
-    case 'buffer_f32':
-      return msg.readFloatBE(offset);
-    case 'buffer_f64':
-      return msg.readDoubleBE(offset);
-    case 'buffer_string':
-      return msg.toString('utf8', offset);
-    default:
-      throw new Error(`Unsupported buffer type: ${bufferType}`);
-    }
-  }
-
-  static writeData(value: any, bufferType: GameMakerBufferType): Buffer {
-    const buffer = Buffer.allocUnsafe(GmBufferInterface.sizeOf(bufferType));
-    switch (bufferType) {
-    case 'buffer_u8':
-      buffer.writeUInt8(value, 0);
-      break;
-    case 'buffer_s8':
-      buffer.writeInt8(value, 0);
-      break;
-    case 'buffer_u16':
-      buffer.writeUInt16BE(value, 0);
-      break;
-    case 'buffer_s16':
-      buffer.writeInt16BE(value, 0);
-      break;
-    case 'buffer_u32':
-      buffer.writeUInt32BE(value, 0);
-      break;
-    case 'buffer_s32':
-      buffer.writeInt32BE(value, 0);
-      break;
-    case 'buffer_u64':
-      buffer.writeBigUInt64BE(value, 0);
-      break;
-    case 'buffer_f32':
-      buffer.writeFloatBE(value, 0);
-      break;
-    case 'buffer_f64':
-      buffer.writeDoubleBE(value, 0);
-      break;
-    case 'buffer_string':
-      buffer.write(value, 0, 'utf8');
-      break;
-    default:
-      throw new Error(`Unsupported buffer type: ${bufferType}`);
-    }
-    return buffer;
-  }
-
-  // Get size of data based on the GameMaker buffer type
-  static sizeOf(bufferType: GameMakerBufferType): number {
-    switch (bufferType) {
-    case 'buffer_u8':
-    case 'buffer_s8':
-      return 1;
-    case 'buffer_u16':
-    case 'buffer_s16':
-      return 2;
-    case 'buffer_u32':
-    case 'buffer_s32':
-    case 'buffer_f32':
-      return 4;
-    case 'buffer_u64':
-    case 'buffer_f64':
-      return 8;
-      // Assuming string length is 1 byte per character
-    case 'buffer_string':
-      return 1;
-    default:
-      throw new Error(`Unsupported buffer type: ${bufferType}`);
-    }
-  }
+interface GMBufferTypeSerializer<T = any> {
+  sizeOf: (data?: T) => number;
+  writeFunction: (buffer: Buffer, value: T, tell: number) => number;
+  readFunction: (buffer: Buffer, tell: number) => T;
 }
 
+// ----------------- Serializer Types ------------------------
+//  Properties and functions for each type of GM buffer.
+// -----------------------------------------------------------
 
-export class _QSerializableContainer {
-  private static _instance: _QSerializableContainer;
+const GMBufferU8: GMBufferTypeSerializer<number> = {
+  sizeOf: () => 1,
+  writeFunction: (buffer, value, tell) => buffer.writeUInt8(value, tell),
+  readFunction: (buffer, tell) => buffer.readUInt8(tell),
+};
+const GMBufferS8: GMBufferTypeSerializer<number> = {
+  sizeOf: () => 1,
+  writeFunction: (buffer, value, tell) => buffer.writeInt8(value, tell),
+  readFunction: (buffer, tell) => buffer.readInt8(tell),
+};
+const GMBufferU16: GMBufferTypeSerializer<number> = {
+  sizeOf: () => 2,
+  writeFunction: (buffer, value, tell) => buffer.writeUInt16LE(value, tell),
+  readFunction: (buffer, tell) => buffer.readUInt16LE(tell),
+};
+const GMBufferS16: GMBufferTypeSerializer<number> = {
+  sizeOf: () => 2,
+  writeFunction: (buffer, value, tell) => buffer.writeInt16LE(value, tell),
+  readFunction: (buffer, tell) => buffer.readInt16LE(tell),
+};
+const GMBufferU32: GMBufferTypeSerializer<number> = {
+  sizeOf: () => 4,
+  writeFunction: (buffer, value, tell) => buffer.writeUInt32LE(value, tell),
+  readFunction: (buffer, tell) => buffer.readUInt32LE(tell),
+};
+const GMBufferU64: GMBufferTypeSerializer<bigint> = {
+  sizeOf: () => 8,
+  writeFunction: (buffer, value, tell) => buffer.writeBigUInt64LE(value, tell),
+  readFunction: (buffer, tell) => buffer.readBigUInt64LE(tell),
+};
+const GMBufferS32: GMBufferTypeSerializer<number> = {
+  sizeOf: () => 4,
+  writeFunction: (buffer, value, tell) => buffer.writeInt32LE(value, tell),
+  readFunction: (buffer, tell) => buffer.readInt32LE(tell),
+};
+const GMBufferF32: GMBufferTypeSerializer<number> = {
+  sizeOf: () => 4,
+  writeFunction: (buffer, value, tell) => buffer.writeFloatLE(value, tell),
+  readFunction: (buffer, tell) => buffer.readFloatLE(tell),
+};
+const GMBufferF64: GMBufferTypeSerializer<number> = {
+  sizeOf: () => 8,
+  writeFunction: (buffer, value, tell) => buffer.writeDoubleLE(value, tell),
+  readFunction: (buffer, tell) => buffer.readDoubleLE(tell),
+};
+const GMBufferBool: GMBufferTypeSerializer<boolean> = {
+  sizeOf: () => 1,
+  writeFunction: (buffer, value, tell) => buffer.writeUInt8(value ? 1 : 0, tell),
+  readFunction: (buffer, tell) => Boolean(buffer.readUInt8(tell)),
+};
+const GMBufferString: GMBufferTypeSerializer<string> = {
+  // We add 1 to the length of the data, because GameMaker adds a null terminator at the end of the string.
+  sizeOf: (data) => data ? Buffer.byteLength(data, 'utf8') + 1 : 0,
+  writeFunction: (buffer, value, tell) => tell + buffer.write(value + '\0', tell, 'utf8'),
+  readFunction: (buffer, tell) => {
+    // Find the index of the null terminator
+    const nullIndex = buffer.indexOf('\0', tell);
+    if (nullIndex < 0) throw new Error('Expect a null terminator while reading a buffer string, but did not find one.');
+    // Extract the string up to the null terminator
+    return buffer.toString('utf8', tell, nullIndex);
+  },
+};
 
-  public readonly bufferTypesMap = new Map();
-
-  static get instance() {
-    if (!this._instance) {
-      this._instance = new _QSerializableContainer();
-    }
-    return this._instance;
-  }
-}
+export const GMBufferSerial: { [key in GameMakerBufferType]: GMBufferTypeSerializer} = {
+  buffer_u8: GMBufferU8,
+  buffer_s8: GMBufferS8,
+  buffer_u16: GMBufferU16,
+  buffer_s16: GMBufferS16,
+  buffer_u32: GMBufferU32,
+  buffer_s32: GMBufferS32,
+  buffer_f32: GMBufferF32,
+  buffer_u64: GMBufferU64,
+  buffer_f64: GMBufferF64,
+  buffer_bool: GMBufferBool,
+  buffer_string: GMBufferString,
+};

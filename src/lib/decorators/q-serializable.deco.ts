@@ -1,20 +1,27 @@
-import { _QSerializableContainer } from '../gm-buffer-interface';
+import 'reflect-metadata';
+import { SerializableField } from '../q-serializer';
+import { _QSerializableContainer } from '../system/q-serializable-container';
 
 export function QSerializable(target: any) {
   Reflect.defineMetadata('name', target.name, target);
 
-  const bufferTypes: string[] = [];
+  const bufferTypes: SerializableField[] = [];
   const instance = new target();
-  const keys = Object.getOwnPropertyNames(instance);
-  console.log(target.name);
-  console.log(keys);
+  const fieldNames = Object.getOwnPropertyNames(instance);
 
-  keys.forEach((key) => {
-    const bufferType = Reflect.getMetadata('bufferType', instance, key);
+  fieldNames.forEach((fieldName) => {
+    const bufferType = Reflect.getMetadata('bufferType', instance, fieldName);
     if (bufferType) {
-      bufferTypes.push(bufferType);
+      bufferTypes.push({
+        fieldName,
+        bufferType
+      });
     }
   });
+
+  if (_QSerializableContainer.instance.bufferTypesMap.has(target.name)) {
+    throw Error(`Cannot register more than one Serializable with the same class name. Class: ${target.name}`);
+  }
 
   // Here you can do whatever you want with bufferTypes
   _QSerializableContainer.instance.bufferTypesMap.set(target.name, bufferTypes);

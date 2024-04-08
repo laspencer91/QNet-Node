@@ -1,1 +1,1 @@
-export interface QSerializable {}
+export class QSerializable {}
