@@ -1,7 +1,6 @@
-import { Location } from '../serializables/location';
 import { QSerializer, SerializableEntityProps } from './q-serializer';
-import { QSerializable } from './decorators/q-serializable.deco';
-import { BufferString } from './decorators/gm-serialializable-fields.deco';
+import { BufferString, QSerializable } from './decorators';
+
 
 @QSerializable
 class MockChatMessageSerializable {

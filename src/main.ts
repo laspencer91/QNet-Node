@@ -1,7 +1,6 @@
 import * as dgram from 'dgram';
-import { QSerializer } from './lib/q-serializer';
 import { Location } from './serializables/location';
-import { MessageEmitter } from './lib/message-emitter';
+import { MessageEmitter, QSerializer } from './lib/q-serializer';
 
 const serializable = new QSerializer([Location]);
 export const AppMessageEmitter = new MessageEmitter();

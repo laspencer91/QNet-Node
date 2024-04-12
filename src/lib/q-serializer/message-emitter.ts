@@ -1,4 +1,5 @@
-import { Constructor } from './types/constructor.type';
+import { Constructor } from './types';
+
 
 /**
  * A class for managing message listeners and dispatching messages of specific types.

@@ -1,5 +1,5 @@
-import { BufferU16, BufferU8 } from '../lib/decorators/gm-serialializable-fields.deco';
-import { QSerializable } from '../lib/decorators/q-serializable.deco';
+import { BufferU16, BufferU8, QSerializable } from '../lib/q-serializer/decorators';
+
 
 @QSerializable
 export class Location {

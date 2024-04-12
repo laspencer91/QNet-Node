@@ -1,7 +1,6 @@
-import { GameMakerBufferType } from './types/gm-buffers.types';
-import { GMBuffer } from './gm-buffer';
+import { GameMakerBufferType, GMBuffer } from '../gm-buffer';
+import { Constructor } from './types';
 import { _QSerializableContainer } from './system/q-serializable-container';
-import { Constructor } from './types/constructor.type';
 
 type SerializableNameId = string;
 
