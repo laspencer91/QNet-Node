@@ -1,11 +1,9 @@
-import { QSerializable } from './types/q-serializable.interface';
 import { GameMakerBufferType } from './types/gm-buffers.types';
 import { GMBuffer } from './gm-buffer';
 import { _QSerializableContainer } from './system/q-serializable-container';
 import { Constructor } from './types/constructor.type';
 
 type SerializableNameId = string;
-
 
 export type SerializableField<RecognizedSerializables extends Array<Constructor> = Array<Constructor>> = {
   fieldName: string,
@@ -36,7 +34,7 @@ export class QSerializer<RecognizedSerializables extends Array<Constructor>> {
 
       const fields = _QSerializableContainer.instance.bufferTypesMap.get(className);
       if (fields === undefined) {
-        throw new Error(`No fields found for @QSerializable - ${className}`);
+        throw new Error(`No fields found for @QSerializable - ${className}. Ensure this class includes the proper annotation @QSerializable.`);
       }
 
       this.serializableConfigs.set(className, {
@@ -50,10 +48,6 @@ export class QSerializer<RecognizedSerializables extends Array<Constructor>> {
     }
 
     return serializables;
-  }
-
-  getSerializableTypeById<ID extends number>(id: ID): typeof this.serializables[ID] {
-    return this.serializables[id];
   }
 
   getSerializableNameById<ID extends number>(id: ID): string {
@@ -82,7 +76,7 @@ export class QSerializer<RecognizedSerializables extends Array<Constructor>> {
     return buffer.toBuffer();
   }
 
-  deserialize(buffer: Buffer): QSerializable | undefined {
+  deserialize(buffer: Buffer): InstanceType<RecognizedSerializables[number]> | undefined {
     const gmBuffer = GMBuffer.from(buffer);
     const serialId = gmBuffer.read('buffer_u16') as number;
     const config = this.getSerializableEntityPropsById(serialId);
@@ -99,7 +93,7 @@ export class QSerializer<RecognizedSerializables extends Array<Constructor>> {
       constructorProps.push(data);
     }
 
-    return new config.constructor(...constructorProps);
+    return new config.constructor(...constructorProps) as InstanceType<RecognizedSerializables[number]>;
   }
 
   getSerializableEntityPropsByName(entityName: string) {

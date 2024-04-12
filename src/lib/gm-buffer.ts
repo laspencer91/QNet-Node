@@ -1,5 +1,5 @@
 import { GameMakerBufferType } from './types/gm-buffers.types';
-import { GMBufferSerial } from './gm-buffer-interface';
+import { GMBufferSerial } from './gm-buffer-type-serializers';
 
 export class GMBuffer {
   private buffer: Buffer;

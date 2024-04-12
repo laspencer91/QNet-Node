@@ -1,4 +1,4 @@
-import { GMBufferSerial } from './gm-buffer-interface';
+import { GMBufferSerial } from './gm-buffer-type-serializers';
 
 describe('GMBufferString', () => {
   const TEST_STRING = 'My Name Is Logan';
