@@ -1,10 +1,9 @@
 import * as dgram from 'dgram';
-import { Location } from './serializables/location';
+import { Location, Test } from './serializables/location';
 import { MessageEmitter, QSerializer } from './lib/q-serializer';
 
-const serializable = new QSerializer([Location]);
+const serializable = new QSerializer([Location, Test]);
 export const AppMessageEmitter = new MessageEmitter();
-
 // SERVER ----------------------------------------------------------------------------
 
 const PORT = 33333; // Choose any available port

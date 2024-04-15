@@ -1,4 +1,4 @@
-import { GameMakerBufferType } from './types/gm-buffers.types';
+import { GameMakerBufferType } from '../types';
 
 interface GMBufferTypeSerializer<T = any> {
   sizeOf: (data?: T) => number;
@@ -62,7 +62,7 @@ const GMBufferBool: GMBufferTypeSerializer<boolean> = {
 };
 const GMBufferString: GMBufferTypeSerializer<string> = {
   // We add 1 to the length of the data, because GameMaker adds a null terminator at the end of the string.
-  sizeOf: (data) => data ? Buffer.byteLength(data, 'utf8') + 1 : 0,
+  sizeOf: (data) => (data ? Buffer.byteLength(data, 'utf8') + 1 : 0),
   writeFunction: (buffer, value, tell) => tell + buffer.write(value + '\0', tell, 'utf8'),
   readFunction: (buffer, tell) => {
     // Find the index of the null terminator
@@ -73,7 +73,7 @@ const GMBufferString: GMBufferTypeSerializer<string> = {
   },
 };
 
-export const GMBufferSerial: { [key in GameMakerBufferType]: GMBufferTypeSerializer} = {
+export const GMBufferSerial: { [key in GameMakerBufferType]: GMBufferTypeSerializer } = {
   buffer_u8: GMBufferU8,
   buffer_s8: GMBufferS8,
   buffer_u16: GMBufferU16,
