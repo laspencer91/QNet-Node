@@ -122,7 +122,7 @@ export class QSerializer {
 
   deserialize<T extends Constructor = Constructor>(buffer: Buffer): T | undefined {
     const gmBuffer = GMBuffer.from(buffer);
-    const serialId = gmBuffer.read('buffer_u16') as number;
+    const serialId = gmBuffer.read('buffer_u16');
     const config = this.getSerializableEntityPropsById(serialId);
 
     if (!config) {

@@ -26,7 +26,10 @@ export class GMBuffer {
     this.bufferTell = gmBufferUserProps.writeFunction(this.buffer, data, this.bufferTell);
   }
 
-  read(bufferType: GameMakerBufferType) {
+  read<T extends GameMakerBufferType>(
+    bufferType: T,
+    // This does some magic to infer the return type of the function based on the input type
+  ): T extends 'buffer_bool' ? boolean : T extends 'buffer_string' ? string : number {
     const gmBufferUserProps = GMBufferSerial[bufferType];
     const data = gmBufferUserProps.readFunction(this.buffer, this.bufferTell);
     this.bufferTell += gmBufferUserProps.sizeOf(data);
