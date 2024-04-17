@@ -120,7 +120,7 @@ export class QSerializer {
     }
   }
 
-  deserialize(buffer: Buffer): Constructor | undefined {
+  deserialize<T extends Constructor = Constructor>(buffer: Buffer): T | undefined {
     const gmBuffer = GMBuffer.from(buffer);
     const serialId = gmBuffer.read('buffer_u16') as number;
     const config = this.getSerializableEntityPropsById(serialId);
@@ -136,7 +136,7 @@ export class QSerializer {
       constructorProps.push(data);
     }
 
-    return new config.constructor(...constructorProps) as Constructor;
+    return new config.constructor(...constructorProps) as T;
   }
 
   getSerializableEntityPropsByName(entityName: string) {

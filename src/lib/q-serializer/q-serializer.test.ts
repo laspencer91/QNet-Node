@@ -72,7 +72,7 @@ describe('QSerializer', () => {
 
   it('Deserializes basic type properly', () => {
     const expectedArrayContents = [1, 0, 76, 111, 103, 97, 110, 0]; // 0 @ second index, because 2 bytes for id.
-    const chatMessage = serializer.deserialize(Buffer.from(expectedArrayContents));
+    const chatMessage = serializer.deserialize<typeof MockChatMessageSerializable>(Buffer.from(expectedArrayContents));
     const expected = new MockChatMessageSerializable('Logan');
     expect(chatMessage).toEqual(expected);
     expect(chatMessage instanceof MockChatMessageSerializable).toBeTruthy();
