@@ -1,7 +1,6 @@
 import { GMBuffer } from '../gm-buffer';
-import { Constructor } from './types';
 import { _QSerializableContainer } from './system/q-serializable-container';
-import { buffer_string, buffer_u16, GameMakerBufferType } from '../types';
+import { buffer_string, buffer_u16, Constructor, GameMakerBufferType, NestedArray } from '@types';
 
 type SerializableNameId = string;
 
@@ -132,11 +131,48 @@ export class QSerializer {
 
     const constructorProps = [];
     for (const serializableField of config.serializableFields) {
-      const data = gmBuffer.read(serializableField.bufferType as GameMakerBufferType);
+      const data = this.readFieldFromBuffer(gmBuffer, serializableField.bufferType);
       constructorProps.push(data);
     }
 
     return new config.constructor(...constructorProps) as T;
+  }
+
+  private readFieldFromBuffer(buffer: GMBuffer, dataType: SerializableType) {
+    if (DataType.isArray(dataType)) {
+      return this.readArrayFromBuffer(buffer, dataType[0]);
+    } else if (DataType.isSerializable(dataType)) {
+      return this.readInstanceFromBuffer(buffer, dataType);
+    }
+
+    return buffer.read(dataType as GameMakerBufferType);
+  }
+
+  private readArrayFromBuffer(buffer: GMBuffer, dataType: SerializableType) {
+    const arrayLength = buffer.read(ARRAY_LENGTH_BUFFER_TYPE);
+    const array = new Array<
+      string | number | boolean | Constructor | NestedArray<string | number | boolean | Constructor>
+    >();
+    for (let i = 0; i < arrayLength; i++) {
+      const fieldData = this.readFieldFromBuffer(buffer, dataType);
+      array.push(fieldData);
+    }
+    return array;
+  }
+
+  private readInstanceFromBuffer(buffer: GMBuffer, dataType: Constructor): Constructor {
+    const serializableEntity = this.getSerializableEntityPropsByName(dataType.name);
+    if (!serializableEntity) {
+      throw new Error(`Type ${dataType.name} is not registered with QSerializer. Could not deserialize.`);
+    }
+
+    const constructorProps = [];
+    for (const serializableField of serializableEntity.serializableFields) {
+      const data = this.readFieldFromBuffer(buffer, serializableField.bufferType);
+      constructorProps.push(data);
+    }
+
+    return new serializableEntity.constructor(...constructorProps) as Constructor;
   }
 
   getSerializableEntityPropsByName(entityName: string) {

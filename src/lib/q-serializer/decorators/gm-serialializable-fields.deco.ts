@@ -10,8 +10,8 @@ import {
   buffer_u32,
   buffer_u64,
   buffer_u8,
-} from '../../types';
-import { Constructor } from '../types';
+  Constructor,
+} from '@types';
 
 export function BufferU8(target: any, key: string) {
   Reflect.defineMetadata('bufferType', buffer_u8, target, key);
@@ -60,11 +60,7 @@ export function BufferString(target: any, key: string) {
 export function BufferObject(type: Constructor) {
   return function (target: any, propertyKey: string) {
     Reflect.defineMetadata('design:type', type, target, propertyKey);
-    const propertyType = Reflect.getMetadata(
-      'design:type',
-      target,
-      propertyKey,
-    );
+    const propertyType = Reflect.getMetadata('design:type', target, propertyKey);
     Reflect.defineMetadata('bufferType', type, target, propertyKey);
     console.log(`Type of ${type.name} is ${propertyType}`);
   };
@@ -73,11 +69,7 @@ export function BufferObject(type: Constructor) {
 export function BufferArray(type: Constructor) {
   return function (target: any, propertyKey: string) {
     Reflect.defineMetadata('design:type', type, target, propertyKey);
-    const propertyType = Reflect.getMetadata(
-      'design:type',
-      target,
-      propertyKey,
-    );
+    const propertyType = Reflect.getMetadata('design:type', target, propertyKey);
     Reflect.defineMetadata('bufferType', [type], target, propertyKey);
     console.log(`Type of ${type.name} is ${propertyType}`);
   };
