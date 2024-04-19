@@ -20,7 +20,7 @@ export type SerializableEntity = {
   constructor: Constructor;
 };
 
-export class QSerializer<H extends InstanceType<Constructor> | undefined> {
+export class QSerializer<H extends InstanceType<Constructor> | undefined = undefined> {
   readonly serializables: Constructor[];
 
   readonly header?: { serializableFields: SerializableField[]; defaultInstance: H };
