@@ -1,4 +1,4 @@
-import { GameMakerBufferType } from '../types';
+import { GameMakerBufferType } from '@types';
 
 interface GMBufferTypeSerializer<T = any> {
   sizeOf: (data?: T) => number;
