@@ -16,6 +16,16 @@ export class MockLocation {
 }
 
 @QSerializable
+class MockHeader {
+  @BufferU8
+  serializableId: number;
+
+  constructor(serializableId: number) {
+    this.serializableId = serializableId;
+  }
+}
+
+@QSerializable
 class MockChatMessageSerializable {
   @BufferString
   sender: string;
@@ -148,8 +158,8 @@ describe('QSerializer', () => {
     const expectedArrayContents = [1, 0, 76, 111, 103, 97, 110, 0]; // 0 @ second index, because 2 bytes for id.
     const chatMessage = serializer.deserialize<typeof MockChatMessageSerializable>(Buffer.from(expectedArrayContents));
     const expected = new MockChatMessageSerializable('Logan');
-    expect(chatMessage).toEqual(expected);
-    expect(chatMessage instanceof MockChatMessageSerializable).toBeTruthy();
+    expect(chatMessage.instance).toEqual(expected);
+    expect(chatMessage.instance instanceof MockChatMessageSerializable).toBeTruthy();
   });
 
   it('Serializes a serializable array.', () => {
@@ -169,9 +179,18 @@ describe('QSerializer', () => {
   });
 
   it('Deserializes nested types.', () => {
-    const mockLocationsContainerContainer = serializer.deserialize(
-      Buffer.from(mockLocationsMasterContainerContainerByteData),
-    );
-    expect(mockLocationsContainerContainer).toBeInstanceOf(MockLocationsContainerContainerSerializable);
+    const message = serializer.deserialize(Buffer.from(mockLocationsMasterContainerContainerByteData));
+    expect(message.instance).toBeInstanceOf(MockLocationsContainerContainerSerializable);
+    expect(message.header).toBeUndefined();
+  });
+
+  it('Serializes and deserializes with header nested types.', () => {
+    const serializerWithHeader = new QSerializer([MockLocation], new MockHeader(123));
+    const bufferData = serializerWithHeader.serialize(new MockLocation(12, 152)) as Buffer;
+    expect(Array.from(bufferData)).toEqual([123, 0, 0, 12, 152, 0]);
+
+    const message = serializerWithHeader.deserialize(bufferData);
+    expect(message.instance).toBeInstanceOf(MockLocation);
+    expect(message.header).toBeInstanceOf(MockHeader);
   });
 });
