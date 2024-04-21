@@ -20,10 +20,10 @@ export type SerializableEntity = {
   constructor: Constructor;
 };
 
-export class QSerializer<H extends InstanceType<Constructor> | undefined = undefined> {
+export class QSerializer<H extends Constructor | undefined = undefined> {
   readonly serializables: Constructor[];
 
-  readonly header?: { serializableFields: SerializableField[]; defaultInstance: H };
+  readonly header?: { serializableFields: SerializableField[]; constructor: H };
 
   readonly serializableConfigs: Map<SerializableNameId, SerializableEntity> = new Map();
 
@@ -61,7 +61,8 @@ export class QSerializer<H extends InstanceType<Constructor> | undefined = undef
   }
 
   private initHeader(header: NonNullable<H>) {
-    const fields = _QSerializableContainer.instance.bufferTypesMap.get(header.constructor.name);
+    const serializableName = Reflect.getMetadata('name', header);
+    const fields = _QSerializableContainer.instance.bufferTypesMap.get(serializableName);
     if (!fields) {
       throw new Error(
         `No fields found for @QSerializable - ${header}. 
@@ -70,11 +71,11 @@ export class QSerializer<H extends InstanceType<Constructor> | undefined = undef
     }
     return {
       serializableFields: fields as SerializableField[],
-      defaultInstance: header,
+      constructor: header,
     };
   }
 
-  serialize(serializable: InstanceType<Constructor>) {
+  serialize(serializable: InstanceType<Constructor>, headerInstance?: InstanceType<NonNullable<H>>) {
     const serializableName = Reflect.getMetadata('name', serializable.constructor);
     const config = this.serializableConfigs.get(serializableName);
 
@@ -84,20 +85,24 @@ export class QSerializer<H extends InstanceType<Constructor> | undefined = undef
     }
 
     const buffer = GMBuffer.new(64);
-    this.writeHeader(buffer);
+    if (headerInstance) {
+      this.writeHeader(buffer, headerInstance);
+    }
     buffer.write(config.serialId, 'buffer_u16');
     this.writeInstanceToBuffer(buffer, serializable);
 
     return buffer.toBuffer();
   }
 
-  writeHeader(buffer: GMBuffer) {
+  writeHeader(buffer: GMBuffer, headerInstance: InstanceType<NonNullable<H>>) {
     if (!this.header) {
-      return;
+      throw new Error(
+        'Attempting to write a header, but no header type has been specified for this QSerializable instance.',
+      );
     }
 
     for (const fieldConfig of this.header.serializableFields) {
-      this.writeFieldToBuffer(buffer, this.header.defaultInstance, fieldConfig);
+      this.writeFieldToBuffer(buffer, headerInstance, fieldConfig);
     }
   }
 
@@ -115,10 +120,14 @@ export class QSerializer<H extends InstanceType<Constructor> | undefined = undef
     }
   }
 
-  private writeFieldToBuffer(buffer: GMBuffer, serializable: any, fieldConfig: SerializableField) {
+  private writeFieldToBuffer(
+    buffer: GMBuffer,
+    serializable: InstanceType<Constructor>,
+    fieldConfig: SerializableField,
+  ) {
     const dataType = fieldConfig.bufferType;
     const fieldName = fieldConfig.fieldName;
-    const fieldValue = serializable[fieldName];
+    const fieldValue = serializable[fieldName as keyof typeof serializable] as any;
 
     console.log(`Writing data type ${dataType} to buffer for field ${fieldName}.`);
 
@@ -178,7 +187,7 @@ export class QSerializer<H extends InstanceType<Constructor> | undefined = undef
     }
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-expect-error
-    return this.readInstanceFromBuffer(buffer, this.header.defaultInstance.constructor) as H;
+    return this.readInstanceFromBuffer(buffer, this.header.constructor) as H;
   }
 
   private readFieldFromBuffer(buffer: GMBuffer, dataType: SerializableType) {
@@ -204,16 +213,14 @@ export class QSerializer<H extends InstanceType<Constructor> | undefined = undef
   }
 
   private readInstanceFromBuffer(buffer: GMBuffer, dataType: Constructor): Constructor {
-    if (this.header?.defaultInstance && dataType.name === this.header.defaultInstance.constructor.name) {
+    if (this.header?.constructor && dataType.name === this.header.constructor.name) {
       const constructorProps = [];
       for (const serializableField of this.header.serializableFields) {
         const data = this.readFieldFromBuffer(buffer, serializableField.bufferType);
         constructorProps.push(data);
       }
 
-      // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-      // @ts-expect-error
-      return new this.header.defaultInstance.constructor(...constructorProps) as Constructor;
+      return new this.header.constructor(...constructorProps) as Constructor;
     } else {
       const serializableEntity = this.getSerializableEntityPropsByName(dataType.name);
       if (!serializableEntity) {

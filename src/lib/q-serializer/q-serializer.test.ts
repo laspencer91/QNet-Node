@@ -185,8 +185,10 @@ describe('QSerializer', () => {
   });
 
   it('Serializes and deserializes with header nested types.', () => {
-    const serializerWithHeader = new QSerializer([MockLocation], new MockHeader(123));
-    const bufferData = serializerWithHeader.serialize(new MockLocation(12, 152)) as Buffer;
+    const serializerWithHeader = new QSerializer([MockLocation], MockHeader);
+    const bufferData = serializerWithHeader.serialize(new MockLocation(12, 152), {
+      serializableId: 123,
+    }) as Buffer;
     expect(Array.from(bufferData)).toEqual([123, 0, 0, 12, 152, 0]);
 
     const message = serializerWithHeader.deserialize(bufferData);
