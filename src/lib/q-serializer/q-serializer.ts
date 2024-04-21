@@ -27,10 +27,10 @@ export class QSerializer<H extends Constructor | undefined = undefined> {
 
   readonly serializableConfigs: Map<SerializableNameId, SerializableEntity> = new Map();
 
-  constructor(serializables: Constructor[], header?: H) {
+  constructor(serializables: Constructor[], headerType?: H) {
     this.serializables = this.registerSerializableList(serializables);
-    if (header) {
-      this.header = this.initHeader(header);
+    if (headerType) {
+      this.header = this.initHeader(headerType);
     }
   }
 
