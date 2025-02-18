@@ -1,6 +1,7 @@
 import 'reflect-metadata';
 // Decorators to mark properties with buffer types
 import {
+  buffer_bool,
   buffer_f32,
   buffer_f64,
   buffer_s16,
@@ -14,6 +15,10 @@ import {
   Constructor,
   GameMakerBufferType,
 } from '@types';
+
+export function BufferBool(target: any, key: string) {
+  Reflect.defineMetadata('bufferType', buffer_bool, target, key);
+}
 
 export function BufferU8(target: any, key: string) {
   Reflect.defineMetadata('bufferType', buffer_u8, target, key);
