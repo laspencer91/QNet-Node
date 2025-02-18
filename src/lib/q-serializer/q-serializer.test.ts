@@ -1,5 +1,6 @@
 import { QSerializer, SerializableEntity } from './q-serializer';
-import { BufferArray, BufferString, BufferU16, BufferU8, QSerializable } from './decorators';
+import { BufferArray, BufferString, BufferU16, BufferU8, QSerializable } from '@q-serializable-decorators';
+import { LocationTest } from '@generated/q-serializables';
 
 @QSerializable
 export class MockLocation {
@@ -71,6 +72,7 @@ const serializables = [
   MockChatMessageSerializable,
   MockLocationsContainerSerializable,
   MockLocationsContainerContainerSerializable,
+  LocationTest,
 ];
 const serializer = new QSerializer(serializables);
 
@@ -151,6 +153,12 @@ describe('QSerializer', () => {
   it('Serializes basic type properly', () => {
     const expectedArrayContents = [1, 0, 76, 111, 103, 97, 110, 0]; // 0 @ second index, because 2 bytes for id.
     const serializedChatMessage = serializer.serialize(new MockChatMessageSerializable('Logan'));
+    expect(Array.from(serializedChatMessage ?? [])).toEqual(expectedArrayContents);
+  });
+
+  it('TODO: DELETE - Serializes basic type properly', () => {
+    const expectedArrayContents = [4, 0, 10, 10, 0, 2, 0, 15, 15]; // 0 @ second index, because 2 bytes for id.
+    const serializedChatMessage = serializer.serialize(new LocationTest(10, 10, [15, 15]));
     expect(Array.from(serializedChatMessage ?? [])).toEqual(expectedArrayContents);
   });
 

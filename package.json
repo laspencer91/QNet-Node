@@ -5,10 +5,11 @@
   "main": "index.js",
   "scripts": {
     "test": "jest --passWithNoTests --updateSnapshot",
-    "dev": "ts-node src/main.ts"
+    "dev": "ts-node src/main.ts",
+    "generate": "ts-node generate.ts"
   },
   "keywords": [],
-  "author": "",
+  "author": "Logan Spencer",
   "license": "ISC",
   "dependencies": {
     "@types/jest": "^29.5.12",

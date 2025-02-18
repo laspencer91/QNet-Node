@@ -36,7 +36,6 @@ describe('GMBufferU8', () => {
     expect(fourthValue).toEqual(128);
     // Should only write up to 255, and so 0 should be the result when 256 was attempted to be written.
     expect(fifth).toEqual(0);
-
   });
 
   it('writes properly', () => {
@@ -90,15 +89,15 @@ describe('GMBufferS8', () => {
 
 describe('GMBufferU16', () => {
   it('reads properly', () => {
-    const testBuffer = Buffer.from([0xFF, 0xFF, 0x00, 0x00, 0xAB, 0xCD]);
+    const testBuffer = Buffer.from([0xff, 0xff, 0x00, 0x00, 0xab, 0xcd]);
     const tell = 0;
     const firstValue = GMBufferSerial.buffer_u16.readFunction(testBuffer, tell);
     const secondValue = GMBufferSerial.buffer_u16.readFunction(testBuffer, tell + 2);
     const thirdValue = GMBufferSerial.buffer_u16.readFunction(testBuffer, tell + 4);
 
     expect(firstValue).toEqual(65535); // 0xFFFF
-    expect(secondValue).toEqual(0);     // 0x0000
-    expect(thirdValue).toEqual(0xCDAB); // 0xABCD
+    expect(secondValue).toEqual(0); // 0x0000
+    expect(thirdValue).toEqual(0xcdab); // 0xABCD
   });
 
   it('writes properly', () => {
@@ -107,11 +106,11 @@ describe('GMBufferU16', () => {
     let tell = 0;
     tell = GMBufferSerial.buffer_u16.writeFunction(testBuffer, 65535, tell);
     tell = GMBufferSerial.buffer_u16.writeFunction(testBuffer, 0, tell);
-    GMBufferSerial.buffer_u16.writeFunction(testBuffer, 0xCDAB, tell);
+    GMBufferSerial.buffer_u16.writeFunction(testBuffer, 0xcdab, tell);
 
     expect(testBuffer.readUInt16LE(0)).toEqual(65535);
     expect(testBuffer.readUInt16LE(2)).toEqual(0);
-    expect(testBuffer.readUInt16LE(4)).toEqual(0xCDAB);
+    expect(testBuffer.readUInt16LE(4)).toEqual(0xcdab);
   });
 });
 
@@ -123,8 +122,8 @@ describe('GMBufferS16', () => {
     const secondValue = GMBufferSerial.buffer_s16.readFunction(testBuffer, tell + 2);
     const thirdValue = GMBufferSerial.buffer_s16.readFunction(testBuffer, tell + 4);
 
-    expect(firstValue).toEqual(-1);    // 0xFFFF
-    expect(secondValue).toEqual(0);     // 0x0000
+    expect(firstValue).toEqual(-1); // 0xFFFF
+    expect(secondValue).toEqual(0); // 0x0000
     expect(thirdValue).toEqual(-2155); // 0xABCD
   });
 

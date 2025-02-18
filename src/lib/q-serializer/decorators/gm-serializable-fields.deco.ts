@@ -1,3 +1,4 @@
+import 'reflect-metadata';
 // Decorators to mark properties with buffer types
 import {
   buffer_f32,
@@ -11,6 +12,7 @@ import {
   buffer_u64,
   buffer_u8,
   Constructor,
+  GameMakerBufferType,
 } from '@types';
 
 export function BufferU8(target: any, key: string) {
@@ -66,11 +68,64 @@ export function BufferObject(type: Constructor) {
   };
 }
 
-export function BufferArray(type: Constructor) {
+export function BufferArray(type: Constructor | GameMakerBufferType) {
   return function (target: any, propertyKey: string) {
-    Reflect.defineMetadata('design:type', type, target, propertyKey);
-    const propertyType = Reflect.getMetadata('design:type', target, propertyKey);
     Reflect.defineMetadata('bufferType', [type], target, propertyKey);
-    console.log(`Type of ${type.name} is ${propertyType}`);
   };
 }
+
+export const BufferTypeDecoratorName = {
+  buffer_u8: {
+    decoName: '@BufferU8',
+    tsType: 'number',
+  },
+  buffer_u16: {
+    decoName: '@BufferU16',
+    tsType: 'number',
+  },
+  buffer_s8: {
+    decoName: '@BufferS8',
+    tsType: 'number',
+  },
+  buffer_string: {
+    decoName: '@BufferString',
+    tsType: 'string',
+  },
+  buffer_bool: {
+    decoName: '@BufferBool',
+    tsType: 'boolean',
+  },
+  buffer_s16: {
+    decoName: '@BufferS16',
+    tsType: 'number',
+  },
+  buffer_u32: {
+    decoName: '@BufferU32',
+    tsType: 'number',
+  },
+  buffer_s32: {
+    decoName: '@BufferS32',
+    tsType: 'number',
+  },
+  buffer_u64: {
+    decoName: '@BufferU64',
+    tsType: 'bigint',
+  },
+  buffer_f32: {
+    decoName: '@BufferF32',
+    tsType: 'number',
+  },
+  buffer_f64: {
+    decoName: '@BufferF64',
+    tsType: 'bigint',
+  },
+  buffer_object: {
+    decoName: '@BufferObject',
+    tsType: null,
+  },
+} as const satisfies {
+  [key in GameMakerBufferType | 'buffer_object']: {
+    decoName: string;
+    tsType: 'bigint' | 'number' | 'string' | 'boolean' | null;
+  };
+};

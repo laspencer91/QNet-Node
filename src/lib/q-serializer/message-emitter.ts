@@ -1,5 +1,4 @@
-import { Constructor } from './types';
-
+import { Constructor } from '@types';
 
 /**
  * A class for managing message listeners and dispatching messages of specific types.
@@ -43,7 +42,7 @@ export class MessageEmitter {
     const callbacks = this.callbacks.get(type.constructor.name);
     if (callbacks) {
       // Execute each callback function registered for the received message type.
-      callbacks.forEach(callback => callback(type));
+      callbacks.forEach((callback) => callback(type));
     }
   }
 }

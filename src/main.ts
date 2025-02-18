@@ -1,8 +1,10 @@
 import * as dgram from 'dgram';
 import { Location, Test } from './serializables/location';
 import { MessageEmitter, QSerializer } from './lib/q-serializer';
+import { LocationTest } from '@generated/q-serializables';
 
-const serializable = new QSerializer([Location, Test]);
+const serializable = new QSerializer([Location, Test, LocationTest]);
+
 export const AppMessageEmitter = new MessageEmitter();
 // SERVER ----------------------------------------------------------------------------
 

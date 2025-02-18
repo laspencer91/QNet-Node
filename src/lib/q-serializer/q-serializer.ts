@@ -1,10 +1,11 @@
 import { GMBuffer } from '../gm-buffer';
 import { _QSerializableContainer } from './system/q-serializable-container';
 import { buffer_string, buffer_u16, Constructor, GameMakerBufferType, NestedArray } from '@types';
+import { DataType } from './utils/data-type.util';
 
 type SerializableNameId = string;
 
-type SerializableType = GameMakerBufferType | Constructor | GameMakerBufferType[] | Constructor[];
+export type SerializableType = GameMakerBufferType | Constructor | GameMakerBufferType[] | Constructor[];
 
 const ARRAY_LENGTH_BUFFER_TYPE = buffer_u16;
 
@@ -145,7 +146,7 @@ export class QSerializer<H extends Constructor | undefined = undefined> {
     }
   }
 
-  private writeArrayToBuffer(buffer: GMBuffer, arrayValue: any[], dataType: Constructor) {
+  private writeArrayToBuffer(buffer: GMBuffer, arrayValue: any[], dataType: Constructor | GameMakerBufferType) {
     const arrayLength = arrayValue.length;
 
     buffer.write(arrayLength, ARRAY_LENGTH_BUFFER_TYPE);
@@ -250,8 +251,3 @@ export class QSerializer<H extends Constructor | undefined = undefined> {
     return Reflect.getMetadata('name', serializable);
   }
 }
-
-const DataType = {
-  isArray: (dt: SerializableType): dt is Constructor[] => Array.isArray(dt),
-  isSerializable: (dt: SerializableType): dt is Constructor => typeof dt === 'function',
-};

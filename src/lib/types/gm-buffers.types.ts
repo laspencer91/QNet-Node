@@ -22,3 +22,17 @@ export type GameMakerBufferType =
   | typeof buffer_u64
   | typeof buffer_f64
   | typeof buffer_string;
+
+export const GMBufferType = {
+  buffer_u8,
+  buffer_s8,
+  buffer_u16,
+  buffer_s16,
+  buffer_u32,
+  buffer_s32,
+  buffer_u64,
+  buffer_f32,
+  buffer_f64,
+  buffer_bool,
+  buffer_string,
+};

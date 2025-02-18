@@ -14,7 +14,7 @@ export function QSerializable(target: any) {
     if (bufferType) {
       bufferTypes.push({
         fieldName,
-        bufferType
+        bufferType,
       });
     }
   });
